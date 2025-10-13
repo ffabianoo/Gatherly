@@ -1,46 +1,28 @@
-import Foundation
+struct AddEventView: View {
+    @State private var vm = AddEventViewModel()
 
-struct Event: Identifiable, Codable, Hashable {
-    let id: String
-    var creatorPid: String
-    var title: String
-    var location: String
-    var description: String
-    var timestamp: String
-    var image_url: String?
-}
-
-extension Event {
-    static let example = Event(
-        id: "abc123",
-        creatorPid: "123456789",
-        title: "Sunset Concert",
-        location: "Student Union Ballroom",
-        description: "Join fellow students for a night of collaborative coding, snacks, and fun.",
-        timestamp: "Aug 8, 2025",
-        image_url: nil
-    )
-
-    // ✅ Only one parsedDate exists now
-    var parsedDate: Date? {
-        let formats = [
-            "MMM d, yyyy",            
-            "MMMM d, yyyy",
-            "MMMM d, yyyy, h:mm a",
-            "yyyy-MM-dd"
-        ]
-
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "en_US_POSIX")
-        df.timeZone = TimeZone(secondsFromGMT: 0)
-
-        for format in formats {
-            df.dateFormat = format
-            if let d = df.date(from: timestamp) {
-                return d
+    var body: some View {
+        Form {
+            Section("Upload Cover Photo") {
+                PhotosPicker(selection: $vm.photo, matching: .images) {
+                    if let image = vm.photo {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 150)
+                            .cornerRadius(8)
+                    } else {
+                        Label("Upload Cover Photo", systemImage: "photo")
+                    }
+                }
             }
+            TextField("Title", text: $vm.title)
+            DatePicker("Date", selection: $vm.date, displayedComponents: .date)
+            TextField("Description", text: $vm.description)
+            Button("Create Event") { vm.createEvent() }
+                .frame(maxWidth: .infinity)
+                .buttonStyle(.borderedProminent)
         }
-        return nil
+        .navigationTitle("Create Event")
     }
 }
-

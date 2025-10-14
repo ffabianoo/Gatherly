@@ -2,30 +2,24 @@ import SwiftUI
 
 struct EventDetailsView: View {
     let event: Event
+    var onUpdate: (Event) -> Void
+
     @Environment(\.dismiss) private var dismiss
     @State private var showActions = false
     @State private var goToEdit = false
 
     var body: some View {
         ScrollView {
-            Image("event_placeholder")
-                .resizable()
-                .scaledToFill()
-                .frame(height: 240)
-                .clipped()
+            EventImageView(urlString: event.image_url, height: 240)
 
             VStack(alignment: .leading, spacing: 12) {
-                Text(event.title)
-                    .font(.title.bold())
+                Text(event.title).font(.title.bold())
 
                 if let date = event.parsedDate {
                     Text(date.formatted(date: .abbreviated, time: .shortened))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .font(.subheadline).foregroundStyle(.secondary)
                 } else {
-                    Text(event.timestamp)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    Text(event.timestamp).font(.subheadline).foregroundStyle(.secondary)
                 }
 
                 HStack(spacing: 8) {
@@ -35,14 +29,13 @@ struct EventDetailsView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-                Divider().overlay(.white)
+                Divider().overlay(.clear)
 
-                Text("About")
-                    .font(.headline)
-                Text(event.description)
+                Text("About").font(.headline)
+                Text(event.description).font(.body)
 
                 Button {
-                    // RSVP action later
+                    // TODO: RSVP later
                 } label: {
                     Text("RSVP")
                         .font(.headline)
@@ -70,28 +63,28 @@ struct EventDetailsView: View {
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showActions = true
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .rotationEffect(.degrees(90))
+                Button { showActions = true } label: {
+                    Image(systemName: "ellipsis").rotationEffect(.degrees(90))
                 }
+                .accessibilityLabel("More actions")
             }
         }
         .confirmationDialog("Actions", isPresented: $showActions, titleVisibility: .visible) {
             Button("Edit Event") { goToEdit = true }
-            Button("Share") { }
-            Button("Delete", role: .destructive) { }
+            if let s = event.image_url, let url = URL(string: s) {
+                ShareLink("Share", item: url)
+            } else {
+                ShareLink("Share", item: "Check out \(event.title) at \(event.location)")
+            }
+            Button("Delete", role: .destructive) {
+                // TODO: Wire delete API; then dismiss()
+            }
             Button("Cancel", role: .cancel) { }
         }
         .navigationDestination(isPresented: $goToEdit) {
-            EditEventView(event: event)
+            EditEventView(event: event) { updated in
+                onUpdate(updated)
+            }
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        EventDetailsView(event: Event.example)
     }
 }

@@ -1,4 +1,3 @@
-// HomeView.swift
 import SwiftUI
 
 struct HomeView: View {
@@ -20,7 +19,8 @@ struct HomeView: View {
                         Text("Failed to load events").font(.headline)
                         Text(msg).font(.subheadline).foregroundStyle(.secondary)
                         Button("Retry") { Task { await vm.load() } }
-                    }.padding()
+                    }
+                    .padding()
                 } else if vm.visibleEvents.isEmpty {
                     ContentUnavailableView(
                         "No events yet",
@@ -29,7 +29,7 @@ struct HomeView: View {
                     )
                 } else {
                     ScrollView {
-                        // Filter/Sort row (they don’t have to do anything yet)
+                        // Filter / Sort / Create
                         HStack {
                             Menu {
                                 Button("All") { vm.selectedFilter = .all }
@@ -49,8 +49,8 @@ struct HomeView: View {
                             Spacer()
 
                             NavigationLink {
-                                AddEventView(vm: AddEventViewModel()) { newEvent in
-                                    vm.add(newEvent)
+                                AddEventView(vm: AddEventViewModel()) { new in
+                                    vm.add(new)
                                 }
                             } label: {
                                 Label("+ Create Event", systemImage: "plus.circle.fill")
@@ -73,7 +73,6 @@ struct HomeView: View {
                     .navigationDestination(for: Event.self) { event in
                         EventDetailsView(event: event) { updated in
                             vm.applyUpdate(updated)
-                            // optional: also call an update API
                         }
                     }
                 }

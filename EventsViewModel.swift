@@ -23,9 +23,9 @@ final class EventsViewModel {
         switch selectedFilter {
         case .all: break
         case .upcoming:
-            list = list.filter { ($0.parsedDate ?? .distantPast) >= Date() }
+            list = list.filter { $0.timestamp >= Date() }
         case .past:
-            list = list.filter { ($0.parsedDate ?? .distantFuture) < Date() }
+            list = list.filter { $0.timestamp < Date() }
         }
 
         // Search
@@ -36,7 +36,7 @@ final class EventsViewModel {
         // Sort
         switch selectedSort {
         case .date:
-            list.sort { ($0.parsedDate ?? .distantPast) < ($1.parsedDate ?? .distantPast) }
+            list.sort { $0.timestamp < $1.timestamp }
         case .alphabetical:
             list.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
         }
@@ -49,8 +49,12 @@ final class EventsViewModel {
         guard !isLoading else { return }
         isLoading = true; defer { isLoading = false }
         errorMessage = nil
-        do { events = try await EventService.shared.fetchEvents() }
-        catch { errorMessage = error.localizedDescription }
+        do {
+            let fetched = try await EventService.shared.fetchEvents()
+            self.events = fetched           // no MainActor.run wrapper
+        } catch {
+            self.errorMessage = error.localizedDescription
+        }
     }
 
     func add(_ new: Event) {

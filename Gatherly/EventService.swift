@@ -14,22 +14,13 @@ final class EventService {
         guard let url = URL(string: "\(base)/events") else {
             throw URLError(.badURL)
         }
-
         let (data, response) = try await URLSession.shared.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200..<300).contains(httpResponse.statusCode) else {
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             throw URLError(.badServerResponse)
         }
-
         #if DEBUG
-        if let raw = String(data: data, encoding: .utf8) {
-            print("Raw /events JSON:\n\(raw)")
-        }
+        if let raw = String(data: data, encoding: .utf8) { print("Raw /events JSON:\n\(raw)") }
         #endif
-
-        let decoder = JSONDecoder()
-        let wrapped = try decoder.decode(EventsResponse.self, from: data)
-        return wrapped.events
+        return try JSONDecoder().decode(EventsResponse.self, from: data).events
     }
 }

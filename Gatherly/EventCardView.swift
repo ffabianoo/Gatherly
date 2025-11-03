@@ -5,11 +5,7 @@ struct EventCardView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Image("event_placeholder") 
-                .resizable()
-                .scaledToFill()
-                .frame(height: 160)
-                .clipped()
+            EventImageView(urlString: event.image_url, height: 160)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.title)
@@ -40,6 +36,3 @@ struct EventCardView: View {
     }
 }
 
-#Preview {
-    EventCardView(event: Event.example)
-}

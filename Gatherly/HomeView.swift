@@ -1,82 +1,85 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var events: [Event] = []
-    @State private var isLoading = false
-    @State private var errorMessage: String?
+    @Bindable var vm: EventsViewModel
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 15),
+        GridItem(.flexible(), spacing: 15)
+    ]
 
     var body: some View {
         NavigationStack {
             Group {
-                if isLoading {
+                if vm.isLoading {
                     ProgressView("Loading events…")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let errorMessage {
+                } else if let msg = vm.errorMessage {
                     VStack(spacing: 12) {
-                        Text("Failed to load events")
-                            .font(.headline)
-                        Text(errorMessage)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Button("Retry") {
-                            Task { await load() }
-                        }
+                        Text("Failed to load events").font(.headline)
+                        Text(msg).font(.subheadline).foregroundStyle(.secondary)
+                        Button("Retry") { Task { await vm.load() } }
                     }
                     .padding()
-                } else if events.isEmpty {
+                } else if vm.visibleEvents.isEmpty {
                     ContentUnavailableView(
                         "No events yet",
                         systemImage: "calendar.badge.exclamationmark",
-                        description: Text("Pull to refresh or check back later.")
+                        description: Text("Pull to refresh or create a new one.")
                     )
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(events) { event in
+                        // Filter / Sort / Create
+                        HStack {
+                            Menu {
+                                Button("All") { vm.selectedFilter = .all }
+                                Button("Upcoming") { vm.selectedFilter = .upcoming }
+                                Button("Past") { vm.selectedFilter = .past }
+                            } label: {
+                                Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                            }
+
+                            Menu {
+                                Button("Date") { vm.selectedSort = .date }
+                                Button("A–Z") { vm.selectedSort = .alphabetical }
+                            } label: {
+                                Label("Sort", systemImage: "arrow.up.arrow.down.circle")
+                            }
+
+                            Spacer()
+
+                            NavigationLink {
+                                AddEventView(vm: AddEventViewModel()) { new in
+                                    vm.add(new)
+                                }
+                            } label: {
+                                Label("+ Create Event", systemImage: "plus.circle.fill")
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+
+                        LazyVGrid(columns: columns, spacing: 15) {
+                            ForEach(vm.visibleEvents) { event in
                                 NavigationLink(value: event) {
                                     EventCardView(event: event)
-                                        .padding(.horizontal)
                                 }
                             }
                         }
+                        .padding(.horizontal)
                         .padding(.vertical, 12)
                     }
-                    .refreshable {
-                        await load()
-                    }
+                    .refreshable { await vm.load() }
                     .navigationDestination(for: Event.self) { event in
-                        EventDetailsView(event: event)
+                        EventDetailsView(event: event) { updated in
+                            vm.applyUpdate(updated)
+                        }
                     }
                 }
             }
             .navigationTitle("Gatherly")
-            .task {
-                await load()
-            }
+            .task { await vm.load() }
         }
-    }
-
-    private func load() async {
-        guard !isLoading else { return }
-        isLoading = true
-        errorMessage = nil
-
-        do {
-            let fetched = try await EventService.shared.fetchEvents()
-            await MainActor.run {
-                self.events = fetched
-            }
-        } catch {
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
-            }
-        }
-
-        isLoading = false
+        .searchable(text: $vm.searchText)
     }
 }
-
-#Preview {
-    HomeView()
-}
-

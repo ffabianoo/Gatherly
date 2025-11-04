@@ -27,6 +27,7 @@
 		AAC5F1B32EB9C8F100F28F0D /* Gatherly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gatherly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC5F1C22EB9C8F300F28F0D /* GatherlyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GatherlyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC5F1CC2EB9C8F300F28F0D /* GatherlyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GatherlyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAC5F2372EB9CC7F00F28F0D /* Gatherly.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Gatherly.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -88,6 +89,13 @@
 				AAC5F1B32EB9C8F100F28F0D /* Gatherly.app */,
 				AAC5F1C22EB9C8F300F28F0D /* GatherlyTests.xctest */,
 				AAC5F1CC2EB9C8F300F28F0D /* GatherlyUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AAC5F2382EB9CC7F00F28F0D /* Products */ = {
+			isa = PBXGroup;
+			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -198,6 +206,12 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AAC5F1B42EB9C8F100F28F0D /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = AAC5F2382EB9CC7F00F28F0D /* Products */;
+					ProjectRef = AAC5F2372EB9CC7F00F28F0D /* Gatherly.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				AAC5F1B22EB9C8F100F28F0D /* Gatherly */,
